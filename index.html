@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html lang="en" class="">
   <head>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+  #rise-wrapper, .rise-container, iframe {
+    height: 100% !important;
+    width: 100% !important;
+  }
+</style>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="utf-8">
@@ -116,6 +129,30 @@
 
     
     <script>__loadEntry()</script>
+<script>
+/* Skip Rise microlearning cover page */
+(function () {
+  function clickStartIfPresent(root) {
+    try {
+      const candidates = Array.from(root.querySelectorAll('button, a, [role="button"]'));
+      const startBtn = candidates.find(el => /^(start|begin|enter)\b/i.test((el.innerText || '').trim()));
+      if (startBtn) {
+        startBtn.click();
+        return true;
+      }
+    } catch(e) {}
+    return false;
+  }
+  if (clickStartIfPresent(document)) return;
+  const obs = new MutationObserver(() => {
+    if (clickStartIfPresent(document)) obs.disconnect();
+  });
+  obs.observe(document.documentElement, { childList: true, subtree: true });
+  setTimeout(()=>obs.disconnect(), 10000);
+})();
+</script>
+</body>
+</html>
     
   </body>
 </html>
