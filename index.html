@@ -97,13 +97,18 @@
       return true;
     }
 
-    function resolvePath(path) {
-      return ('assets/').concat(path);
-    }
+    
+   function resolvePath(path) {
+  // Ensure correct base path for GitHub Pages
+  const base = location.pathname.split('/').slice(0, -1).join('/') + '/';
+  return base + 'assets/' + path;
+}
+
 
     function resolveFontPath(font) {
-      return ('lib/fonts/').concat(font.key.split('/').reverse()[0]);
-    }
+  const base = location.pathname.split('/').slice(0, -1).join('/') + '/';
+  return base + 'lib/fonts/' + font.key.split('/').reverse()[0];
+}
 
     root.Runtime = {
       fetch: window.__fetchCourse,
