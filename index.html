@@ -125,34 +125,53 @@
       resolveFontPath: resolveFontPath
     };
   }(window));
-</script>
-
-    
-    <script>__loadEntry()</script>
-<script>
-/* Skip Rise microlearning cover page */
+<<script>
+/* Aggressive skip for Rise microlearning cover */
 (function () {
-  function clickStartIfPresent(root) {
+  function findStartButton(root) {
+    const nodes = Array.from(root.querySelectorAll('button, a, [role="button"], [aria-label]'));
+    const match = nodes.find(el => {
+      const t = (el.innerText || el.textContent || '').trim().toLowerCase();
+      const aria = (el.getAttribute('aria-label') || '').toLowerCase();
+      const cls = (el.className || '').toLowerCase();
+      return (
+        /start|begin|enter|continue|launch/.test(t) ||
+        /start|begin|enter|continue|launch/.test(aria) ||
+        /start|begin|enter|continue|launch/.test(cls)
+      );
+    });
+    return match;
+  }
+
+  function tryClick() {
     try {
-      const candidates = Array.from(root.querySelectorAll('button, a, [role="button"]'));
-      const startBtn = candidates.find(el => /^(start|begin|enter)\b/i.test((el.innerText || '').trim()));
-      if (startBtn) {
-        startBtn.click();
+      const btn = findStartButton(document);
+      if (btn) {
+        btn.click();
         return true;
       }
     } catch(e) {}
     return false;
   }
-  if (clickStartIfPresent(document)) return;
+
+  // Try immediately, then on interval, then observe DOM mutations
+  if (tryClick()) return;
+
+  let tries = 0;
+  const iv = setInterval(() => {
+    if (tryClick() || ++tries > 40) clearInterval(iv); // ~20s max
+  }, 500);
+
   const obs = new MutationObserver(() => {
-    if (clickStartIfPresent(document)) obs.disconnect();
+    if (tryClick()) { obs.disconnect(); clearInterval(iv); }
   });
   obs.observe(document.documentElement, { childList: true, subtree: true });
-  setTimeout(()=>obs.disconnect(), 10000);
+
+  // Hard fallback: if hash route appears, stop scanning
+  window.addEventListener('hashchange', () => { obs.disconnect(); clearInterval(iv); }, { once: true });
 })();
 </script>
-</body>
-</html>
+
     
   </body>
 </html>
